@@ -1,0 +1,9 @@
+# Ignore main executable
+Main
+
+# Ignore .o and .hi
+*.o
+*.hi
+
+# Ignore tex swp files
+*.tex.swp

@@ -13,7 +13,9 @@ import Common
 ------------------------
 
 num :: Integer -> LamTerm
-num n =  undefined
+num n = Abs "f" (Abs "x" (app n))
+            where app 0 = (LVar "x")
+                  app n = (App (LVar "f") (app (n-1)))
 
 -----------------------
 --- Sección 2 Parsers
@@ -34,21 +36,34 @@ untyped = makeTokenParser (haskellStyle { identStart = letter <|> char '_',
  
 -- Parser para comandos
 parseStmt :: Parser a -> Parser (Stmt a)
-parseStmt p = do
-          reserved untyped "def"
-          x <- identifier untyped
-          reservedOp untyped "="
-          t <- p
-          return (Def x t)
-    <|> fmap Eval p
+parseStmt p = do reserved untyped "def"
+                 x <- identifier untyped
+                 reservedOp untyped "="
+                 t <- p
+                 return (Def x t)
+             <|> fmap Eval p
 
  
 parseTermStmt :: Parser (Stmt Term)
 parseTermStmt = fmap (fmap conversion) (parseStmt parseLamTerm)
 
+
+{-  Gramatica del calculo lambda extendido
+
+    <lambdaExp>  := '\' <identifiers> '.' <lambdaExp>
+                  | <lambdaTerm>
+                 
+    <lambdaTerm> := <lambdaTerm> <lambdaTerm>
+                  | '(' <lambdaExp> ')'
+                  | <number>
+                  | <var>
+
+-}
+
 -- Parser para LamTerms 
 parseLamTerm :: Parser LamTerm
-parseLamTerm = undefined 
+parseLamTerm = do identifier untyped
+                  return (LVar "x1")
 
 -- conversion a términos localmente sin nombres
 conversion  :: LamTerm -> Term

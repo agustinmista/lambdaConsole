@@ -69,6 +69,7 @@ module Main where
         --  enter loop
         rec state' {inter=True}
 
+
   data Command = Compile CompileForm
                | Print String
                | Recompile  
@@ -76,6 +77,7 @@ module Main where
                | Quit
                | Help
                | Noop
+
 
   data CompileForm = CompileInteractive  String
                    | CompileFile         String
@@ -99,6 +101,7 @@ module Main where
        else
          return (Compile (CompileInteractive x))
 
+
   handleCommand :: State -> Command -> IO (Maybe State)
   handleCommand state@(S {..}) cmd
     =  case cmd of
@@ -118,7 +121,9 @@ module Main where
                              >> return (Just state) 
                         else handleCommand state (Compile (CompileFile lfile))
 
+
   data InteractiveCommand = Cmd [String] String (String -> Command) String
+
 
   commands :: [InteractiveCommand]
   commands
@@ -130,6 +135,7 @@ module Main where
          Cmd [":quit"]        ""        (const Quit)   "Salir del intérprete",
          Cmd [":help",":?"]   ""        (const Help)   "Mostrar esta lista de comandos" ]
   
+  
   helpTxt :: [InteractiveCommand] -> String
   helpTxt cs
     =  "Lista de comandos:  Cualquier comando puede ser abreviado a :c donde\n" ++
@@ -140,10 +146,12 @@ module Main where
                      let  ct = concat (intersperse ", " (map (++ if null a then "" else " " ++ a) c))
                      in   ct ++ replicate ((24 - length ct) `max` 2) ' ' ++ d) cs)
 
+
   compileFiles :: [String] -> State -> IO State
   compileFiles [] s      = return s
   compileFiles (x:xs) s  = do s' <- compileFile (s {lfile=x, inter=False})  x
                               compileFiles xs s'
+
 
   compileFile :: State -> String -> IO State
   compileFile state@(S {..}) f =
@@ -156,13 +164,15 @@ module Main where
                            return "")
       stmts <- parseIO f' (many parseTermStmt) x
       maybe (return state) (foldM handleStmt state) stmts
-
+      
+      
 
   compilePhrase :: State -> String -> IO State
   compilePhrase state x =
     do
       x' <- parseIO "<interactive>" parseTermStmt x
       maybe (return state) (handleStmt state) x'
+
 
 
   printPhrase   :: String -> IO ()
@@ -173,6 +183,7 @@ module Main where
      where p :: Parser (LamTerm,Term)
            p = do a <- parseLamTerm
                   return (a,conversion a)
+
 
   printStmt ::  Stmt (LamTerm,Term) -> IO ()
   printStmt stmt =  
@@ -187,10 +198,12 @@ module Main where
                                        render (printTerm e)
       putStrLn outtext
 
+
   parseIO :: String -> Parser a -> String -> IO (Maybe a)
   parseIO f p x = case parse (totParser p) f x of
                     Left e  -> putStrLn (show e) >> return Nothing
                     Right r -> return (Just r)
+
 
   handleStmt ::  State -> Stmt Term -> IO State
   handleStmt state stmt =
@@ -207,7 +220,9 @@ module Main where
                   putStrLn outtext
          return (state { ve = (Global i, v) : ve state})
 
+
   prelude = "Prelude.lam"
+
 
   it :: String          
   it = "it"
