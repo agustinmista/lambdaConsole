@@ -48,22 +48,38 @@ parseTermStmt :: Parser (Stmt Term)
 parseTermStmt = fmap (fmap conversion) (parseStmt parseLamTerm)
 
 
-{-  Gramatica del calculo lambda extendido
 
-    <lambdaExp>  := '\' <identifiers> '.' <lambdaExp>
-                  | <lambdaTerm>
-                 
-    <lambdaTerm> := <lambdaTerm> <lambdaTerm>
-                  | '(' <lambdaExp> ')'
-                  | <number>
-                  | <var>
+
+
+
+{-  Gramatica del calculo lambda extendido
+    
+    <atom>   := <var> 
+              | <number>
+              | '(' <term> ')'
+
+    <ids>    := <var>
+              | <var> <ids>
+
+    <term>   := '\' <ids> '.' <term>        
+              | <term'> <notApp>
+
+    <term'>  := <notApp> <term'>
+              | <empty>
+
+    <notApp> := <atom>
+              | '\' <ids> '.' <term>
 
 -}
 
 -- Parser para LamTerms 
 parseLamTerm :: Parser LamTerm
-parseLamTerm = do identifier untyped
-                  return (LVar "x1")
+parseLamTerm = do symbol '\\'
+                  ids <- parseLamAbsIds
+                  symbol '.'
+                  term <- parseLamTerm
+                  return $ 
+                  
 
 -- conversion a términos localmente sin nombres
 conversion  :: LamTerm -> Term
