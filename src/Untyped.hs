@@ -47,47 +47,85 @@ parseStmt p = do reserved untyped "def"
 parseTermStmt :: Parser (Stmt Term)
 parseTermStmt = fmap (fmap conversion) (parseStmt parseLamTerm)
 
+{-  
 
-
-
-
-
-{-  Gramatica del calculo lambda extendido
+--  Gramatica del calculo lambda extendido
     
-    <atom>   := <var> 
-              | <number>
-              | '(' <term> ')'
+    <atom>   := <var> | <number> | '(' <term> ')'
 
-    <ids>    := <var>
-              | <var> <ids>
+    <ids>    := <var> ( e | <ids> )
 
-    <term>   := '\' <ids> '.' <term>        
-              | <term'> <notApp>
+    <abs>    := '\' <ids> '.' <term>
 
-    <term'>  := <notApp> <term'>
-              | <empty>
+    <notAbs> := <atom> | <notAbs> <notApp>
+    
+    <notApp> := <atom> | <abs>
+    
+    <term>   := <abs> | <notAbs>
 
-    <notApp> := <atom>
-              | '\' <ids> '.' <term>
 
+ -- Gramatica del calculo lambda extendido sin recursion a izq
+    
+    <atom>   := <var> | <number> | '(' <term> ')'
+
+    <ids>    := <var> ( e | <ids> )
+
+    <abs>    := '\' <ids> '.' <term>
+
+    <notAbs> := <atom> <notAbs'>
+    <notAbs'> := <notApp> <notAbs'> | e
+    
+    <notApp> := <atom> | <abs>
+    
+    <term>   := <abs> | <notAbs>
+    
 -}
+
+
+-- Parsers auxiliares para LamTerms
+
+parseAtom :: Parser LamTerm
+parseAtom = parens untyped parseLamTerm
+        <|> do var <- identifier untyped
+               return $ LVar var
+
+parseIds :: Parser [String]
+parseIds = many1 $ identifier untyped
+
+parseAbs :: Parser LamTerm
+parseAbs = do reservedOp untyped "\\"
+              (i:ids) <- parseIds
+              reservedOp untyped "."
+              term <- parseLamTerm
+              return $ Abs i (nest ids term)
+                  where nest [] t = t
+                        nest (x:xs) t = Abs x (nest xs t)
+
+parseNotAbs :: Parser LamTerm
+parseNotAbs = do atom <- parseAtom
+                 f_nabs' <- parseNotAbs'
+                 return $ f_nabs' atom
+                 
+parseNotAbs' :: Parser (LamTerm -> LamTerm)
+parseNotAbs' = do napp <- parseNotApp
+                  f_nabs' <- parseNotAbs'
+                  return $ \x -> f_nabs' (App x napp)
+           <|> return id
+                  
+parseNotApp :: Parser LamTerm
+parseNotApp = parseAtom <|> parseAbs
 
 -- Parser para LamTerms 
 parseLamTerm :: Parser LamTerm
-parseLamTerm = do symbol '\\'
-                  ids <- parseLamAbsIds
-                  symbol '.'
-                  term <- parseLamTerm
-                  return $ 
+parseLamTerm = parseAbs <|> parseNotAbs
                   
-
 -- conversion a términos localmente sin nombres
 conversion  :: LamTerm -> Term
 conversion = undefined
 
 -- para testear el parser interactivamente.
 testParser :: Parser LamTerm
-testParser = totParser parseLamTerm                                    
+testParser = totParser parseLamTerm                                   
 
 -------------------------------
 -- Sección 3

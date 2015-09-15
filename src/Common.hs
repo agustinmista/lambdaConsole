@@ -6,7 +6,7 @@ module Common where
                 deriving (Show)
 
   instance Functor Stmt where
-    fmap f (Def str a)  = Def str (f a)
+    fmap f (Def str a)  = Def  str (f a)
     fmap f (Eval a)     = Eval (f a) 
   
   -- Tipos de los nombres

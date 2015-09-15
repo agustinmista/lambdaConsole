@@ -82,6 +82,7 @@ module Main where
   data CompileForm = CompileInteractive  String
                    | CompileFile         String
   
+  
   interpretCommand :: String -> IO Command
   interpretCommand x
     =  if isPrefixOf ":" x then
