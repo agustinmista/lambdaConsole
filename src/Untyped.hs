@@ -63,7 +63,6 @@ parseTermStmt = fmap (fmap conversion) (parseStmt parseLamTerm)
     
     <term>   := <abs> | <notAbs>
 
-
  -- Gramatica del calculo lambda extendido sin recursion a izq
     
     <atom>   := <var> | <number> | '(' <term> ')'
@@ -83,11 +82,12 @@ parseTermStmt = fmap (fmap conversion) (parseStmt parseLamTerm)
 
 
 -- Parsers auxiliares para LamTerms
-
 parseAtom :: Parser LamTerm
 parseAtom = parens untyped parseLamTerm
         <|> do var <- identifier untyped
                return $ LVar var
+        <|> do n <- read `fmap` many1 digit
+               return $ num n
 
 parseIds :: Parser [String]
 parseIds = many1 $ identifier untyped
@@ -127,19 +127,20 @@ toTerm :: [String] -> LamTerm ->  Term
 toTerm names (Abs name t) = Lam $ toTerm (name:names) t 
 toTerm names (App t1 t2) = (toTerm names t1) :@: (toTerm names t2)
 toTerm names (LVar name) = case elemIndex name names
-                        of Just index -> Bound index
-                           Nothing    -> Free $ Global name
+                           of Just index -> Bound index
+                              Nothing    -> Free $ Global name
 
 -- para testear el parser interactivamente.
 testParser :: Parser LamTerm
-testParser = totParser parseLamTerm                                   
+testParser = totParser parseLamTerm
 
 -------------------------------
 -- Sección 3
 -------------------------------
 
 vapp :: Value -> Value -> Value
-vapp = undefined
+vapp (VNeutral t1) t2 = VNeutral $ NApp t1 t2
+vapp (VLam f)      t2 = f t2
 
  
 eval :: [(Name,Value)] -> Term -> Value
