@@ -121,7 +121,14 @@ parseLamTerm = parseAbs <|> parseNotAbs
                   
 -- conversion a términos localmente sin nombres
 conversion  :: LamTerm -> Term
-conversion = undefined
+conversion  = toTerm []
+
+toTerm :: [String] -> LamTerm ->  Term
+toTerm names (Abs name t) = Lam $ toTerm (name:names) t 
+toTerm names (App t1 t2) = (toTerm names t1) :@: (toTerm names t2)
+toTerm names (LVar name) = case elemIndex name names
+                        of Just index -> Bound index
+                           Nothing    -> Free $ Global name
 
 -- para testear el parser interactivamente.
 testParser :: Parser LamTerm
