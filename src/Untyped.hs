@@ -115,10 +115,12 @@ parseNotAbs' = do napp <- parseNotApp
 parseNotApp :: Parser LamTerm
 parseNotApp = parseAtom <|> parseAbs
 
+
 -- Parser para LamTerms 
 parseLamTerm :: Parser LamTerm
 parseLamTerm = parseAbs <|> parseNotAbs
-                  
+                
+                
 -- conversion a términos localmente sin nombres
 conversion  :: LamTerm -> Term
 conversion  = toTerm []
@@ -129,6 +131,7 @@ toTerm names (App t1 t2) = (toTerm names t1) :@: (toTerm names t2)
 toTerm names (LVar name) = case elemIndex name names
                            of Just index -> Bound index
                               Nothing    -> Free $ Global name
+
 
 -- para testear el parser interactivamente.
 testParser :: Parser LamTerm
@@ -143,12 +146,28 @@ vapp (VNeutral t1) t2 = VNeutral $ NApp t1 t2
 vapp (VLam f)      t2 = f t2
 
  
-eval :: [(Name,Value)] -> Term -> Value
+eval :: NameEnv Value -> Term -> Value
 eval  e t = eval' t (e,[])
 
 eval' :: Term -> (NameEnv Value,[Value]) -> Value
+eval' (Bound  ii) d    = (snd d) !! ii
+eval' (t1 :@: t2) d    = vapp (eval' t1 d) (eval' t2 d)
+eval' (Lam e)     d    = VLam (\x -> eval' e (fst d, (x:snd d)))
+eval' (Free n) (d0,d1) = if fst hd == n  --Ver esta parte
+                            then snd hd
+                            else eval' (Free n) (tail d0, d1)
+                                where hd = head d0
+
+{-  Paula
+eval' :: Term -> (NameEnv Value,[Value]) -> Value
 eval' (Bound  ii)  d  =  (snd d) !! ii
-eval' t            d  = undefined
+eval' (Free n) (d0,d1) = if fst hd == n  --Ver esta parte
+                            then snd hd
+                            else eval' (Free n) (tail d0, d1)
+                                where hd = head d0
+eval' (t0 :@: t1) d = vapp (eval' t0 d) (eval' t1 d)
+eval' (Lam e) d = VLam (\x -> eval' e (fst d, (x:snd d)))
+-}
 
 -------------------------------
 -- Sección 4
