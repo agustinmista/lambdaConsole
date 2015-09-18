@@ -86,8 +86,8 @@ parseAtom :: Parser LamTerm
 parseAtom = parens untyped parseLamTerm
         <|> do var <- identifier untyped
                return $ LVar var
-        <|> do n <- read `fmap` many1 digit
-               return $ num n
+            <|> do n <- read `fmap` many1 digit
+                   return $ num n
 
 parseIds :: Parser [String]
 parseIds = many1 $ identifier untyped
@@ -146,32 +146,31 @@ vapp (VNeutral t1) t2 = VNeutral $ NApp t1 t2
 vapp (VLam f)      t2 = f t2
 
  
-eval :: NameEnv Value -> Term -> Value
+eval :: [(Name, Value)] -> Term -> Value
 eval  e t = eval' t (e,[])
 
-eval' :: Term -> (NameEnv Value,[Value]) -> Value
-eval' (Bound  ii) d    = (snd d) !! ii
-eval' (t1 :@: t2) d    = vapp (eval' t1 d) (eval' t2 d)
-eval' (Lam e)     d    = VLam (\x -> eval' e (fst d, (x:snd d)))
-eval' (Free n) (d0,d1) = if fst hd == n  --Ver esta parte
-                            then snd hd
-                            else eval' (Free n) (tail d0, d1)
-                                where hd = head d0
+eval' :: Term -> (NameEnv Value, [Value]) -> Value
+eval' (t1 :@: t2)        d = vapp (eval' t1 d) (eval' t2 d)
+eval' (Bound ii) (env, bv) = bv !! ii
+eval' (Lam e)    (env, bv) = VLam (\x -> eval' e (env, (x:bv)))
+eval' (Free n)   (env, bv) = lookFor n env
+                                where lookFor n [] = VNeutral $ NFree $ n
+                                      lookFor n ((k, v) : xs) = 
+                                            if k == n
+                                            then v
+                                            else lookFor n xs
 
-{-  Paula
-eval' :: Term -> (NameEnv Value,[Value]) -> Value
-eval' (Bound  ii)  d  =  (snd d) !! ii
-eval' (Free n) (d0,d1) = if fst hd == n  --Ver esta parte
-                            then snd hd
-                            else eval' (Free n) (tail d0, d1)
-                                where hd = head d0
-eval' (t0 :@: t1) d = vapp (eval' t0 d) (eval' t1 d)
-eval' (Lam e) d = VLam (\x -> eval' e (fst d, (x:snd d)))
--}
 
 -------------------------------
 -- Sección 4
 -------------------------------
 
-quote  :: Value -> Term
-quote  =  undefined
+quote :: Value -> Term
+quote v = quote' v 0
+
+quote' :: Value -> Int -> Term
+quote' (VNeutral (NFree (Global n))) i = Free $ Global n
+quote' (VNeutral (NFree (Quote  n))) i = Bound (i - n - 1)
+quote' (VNeutral (NApp  n v))        i = (quote' (VNeutral n) i) :@: (quote' v i)
+quote' (VLam f)                      i = Lam $ quote' (f (VNeutral $ NFree $ Quote i)) (i+1)
+
