@@ -150,10 +150,10 @@ eval :: [(Name, Value)] -> Term -> Value
 eval  e t = eval' t (e,[])
 
 eval' :: Term -> (NameEnv Value, [Value]) -> Value
-eval' (t1 :@: t2)        d = vapp (eval' t1 d) (eval' t2 d)
-eval' (Bound ii) (env, bv) = bv !! ii
-eval' (Lam e)    (env, bv) = VLam (\x -> eval' e (env, (x:bv)))
-eval' (Free n)   (env, bv) = lookFor n env
+eval' (t1 :@: t2) d         = vapp (eval' t1 d) (eval' t2 d)
+eval' (Bound ii)  (env, bv) = bv !! ii
+eval' (Lam e)     (env, bv) = VLam (\x -> eval' e (env, (x:bv)))
+eval' (Free n)    (env, bv) = lookFor n env
                                 where lookFor n [] = VNeutral $ NFree $ n
                                       lookFor n ((k, v) : xs) = 
                                             if k == n
