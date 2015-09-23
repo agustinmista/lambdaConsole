@@ -1,0 +1,116 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{fancyhdr, float, graphicx, caption}
+\usepackage{amsmath, amssymb}
+\usepackage{bm}
+\usepackage[margin=1in]{geometry}
+\usepackage{multicol}
+\usepackage{proof}
+\usepackage{titlesec} 
+
+\setlength{\inferLineSkip}{4pt}
+
+\titleformat{\subsection}[runin]
+  {\normalfont\large\bfseries}{\thesubsection}{1em}{}	
+\titleformat{\subsubsection}[runin]
+  {\normalfont\normalsize\bfseries}{\thesubsubsection}{1em}{}
+
+
+\pagestyle{fancy}
+\renewcommand{\figurename}{Figura}
+\renewcommand\abstractname{\textit{Abstract}}
+
+\fancyhf{}
+\fancyhead[LE,RO]{\textit{Intérprete de Cálculo Lambda}}
+\fancyfoot[RE,CO]{\thepage}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\title{
+	%Logo UNR
+	\begin{figure}[!h]
+		\centering
+		\includegraphics[scale=1]{unr.png}
+		\label{}
+	\end{figure}
+	% Pie Logo
+	\normalsize
+		\textsc{Universidad Nacional de Rosario}\\	
+		\textsc{Facultad de Ciencias Exactas, Ingeniería y Agrimensura}\\
+		\textit{Licenciatura en Ciencias de la Computación}\\
+		\textit{Análisis de Lenguajes de Programación}\\
+	% Título
+	\vspace{30pt}
+	\hrule{}
+	\vspace{15pt}
+	\huge
+		\textbf{Intérprete de Cálculo Lambda}\\
+	\vspace{15pt}
+	\hrule{}
+	\vspace{30pt}
+	% Alumnos/docentes
+	\begin{multicols}{2}
+	\raggedright
+		\large
+			\textbf{Alumnos:}\\
+		\normalsize
+			CRESPO, Lisandro (C-6165/4) \\
+			MISTA, Agustín (M-6105/1) \\
+			$\;$ \\
+			$\;$ \\
+	\raggedleft
+		\large
+			\textbf{Docentes:}\\
+		\normalsize
+			JASKELIOFF, Mauro\\
+			RABASEDAS, Juan Manuel\\
+			SIMICH, Eugenia\\
+			MANZINO, Cecilia\\
+	\end{multicols}
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+\date{22 de Septiembre de 2015}
+\maketitle
+
+\pagebreak
+%----------------------------------------------------------
+\subsection*{Ejercicio 2.1.} 
+	\emph{Definimos la gramática extendida del $\lambda$-cálculo.}
+	\\
+	\begin{alignat*}{3}
+		\langle atom \rangle \; &:= \; \langle var \rangle\; | \;\langle number \rangle\; | \;{\textbf (} \; \langle term \rangle \; {\textbf )}\\[0.5em]
+		\langle ids \rangle \; &:= \; \langle var \rangle\ ( \; \epsilon\; | \; \langle ids \rangle\; )\\[0.5em]
+		\langle abs \rangle \; &:= \; \lambda \;\langle ids \rangle\; {\textbf .}\; \langle term \rangle \\[0.5em]
+		\langle notAbs \rangle \; &:= \; \langle atom \rangle\; | \;\langle notAbs \rangle \; \langle notApp \rangle \\[0.5em]
+		\langle notApp \rangle \; &:= \; \langle atom \rangle\; | \;\langle abs \rangle \\[0.5em]
+		\langle term \rangle \; &:= \; \langle abs \rangle\; | \;\langle notAbs \rangle \\[0.5em]
+	\end{alignat*}
+%----------------------------------------------------------
+\subsection*{Ejercicio 2.2.}
+	\emph{Eliminamos la recursión a izquierda de la gramática planteada en el item anterior.}
+	\\
+	\begin{alignat*}{3}
+			\langle atom \rangle \; &:= \; \langle var \rangle\; | \;\langle number \rangle\; | \;{\textbf (} \; \langle term \rangle \; {\textbf )}\\[0.5em]
+		\langle ids \rangle \; &:= \; \langle var \rangle\ ( \; \epsilon\; | \; \langle ids \rangle \; )\\[0.5em]
+		\langle abs \rangle \; &:= \; \lambda \;\langle ids \rangle\; {\textbf .}\; \langle term \rangle \\[0.5em]
+		\langle notAbs \rangle \; &:= \; \langle atom \rangle\; \langle notAbs' \rangle \\[0.5em]
+		\langle notAbs' \rangle \; &:= \; \langle notApp \rangle \; \langle notAbs' \rangle \; |\ \epsilon  \\[0.5em]
+		\langle notApp \rangle \; &:= \; \langle atom \rangle\; | \; \langle abs \rangle \\[0.5em]
+		\langle term \rangle \; &:= \; \langle abs \rangle\; | \;\langle notAbs \rangle \\[0.5em]
+	\end{alignat*}
+\\
+\\
+\vspace{\fill}
+\begin{multicols}{2}
+	\hrule
+	\vspace{5pt}
+	CRESPO, Lisandro \\
+	\linebreak
+
+	\hrule
+	\vspace{5pt}
+	MISTA, Agustín \\
+\end{multicols}
+
+\end{document}
