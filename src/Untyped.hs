@@ -31,8 +31,8 @@ totParser p = do
 -- Analizador de Tokens
 untyped :: TokenParser u
 untyped = makeTokenParser (haskellStyle { identStart = letter <|> char '_',
-                                          reservedNames = ["def"] })
-
+                                          reservedNames = ["def"],
+                                          opLetter = oneOf "" })
  
 -- Parser para comandos
 parseStmt :: Parser a -> Parser (Stmt a)
