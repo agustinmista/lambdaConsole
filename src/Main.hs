@@ -139,10 +139,10 @@ module Main where
   
   helpTxt :: [InteractiveCommand] -> String
   helpTxt cs
-    =  "Lista de comandos:  Cualquier comando puede ser abreviado a :c donde\n" ++
-       "c es el primer caracter del nombre completo.\n\n" ++
-       "<expr>                  evaluar la expresión\n" ++
-       "def <var> = <expr>      definir una variable\n" ++
+    =  "Lista de comandos:  \nCualquier comando puede ser abreviado a :c donde c es\n" ++
+       "el primer caracter del nombre completo.\n\n" ++
+       "<expr>                  Evaluar la expresión\n" ++
+       "def <var> = <expr>      Definir una variable\n" ++
        unlines (map (\ (Cmd c a _ d) -> 
                      let  ct = concat (intersperse ", " (map (++ if null a then "" else " " ++ a) c))
                      in   ct ++ replicate ((24 - length ct) `max` 2) ' ' ++ d) cs)
