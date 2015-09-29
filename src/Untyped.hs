@@ -86,7 +86,7 @@ parseAtom :: Parser LamTerm
 parseAtom = parens untyped parseLamTerm
         <|> do var <- identifier untyped
                return $ LVar var
-            <|> do n <- read `fmap` many1 digit
+            <|> do n <- natural untyped
                    return $ num n
 
 parseIds :: Parser [String]
